@@ -18,8 +18,8 @@ def create_task(body:TaskSchema , db:Session , user:UserModel):
     return new_task  
 
 
-def get_tasks(db:Session):
-    tasks = db.query(TaskModel).all()
+def get_tasks(db:Session , user:UserModel):
+    tasks = db.query(TaskModel).filter(TaskModel.user_id==user.id).all()
 
     return tasks
 
@@ -31,11 +31,14 @@ def get_one_tasks(task_id:int , db:Session):
 
     return one_task
 
-def update_task(task_id: int , body:TaskSchema, db:Session):
-    one_task = db.query(TaskModel).get(task_id)
+def update_task(task_id: int , body:TaskSchema, db:Session , user:UserModel):
+    one_task:TaskModel = db.query(TaskModel).get(task_id)
     
     if not one_task:
         return HTTPException(404 , detail="Not Found")
+
+    if one_task.user_id != user.id:
+        return HTTPException(401 , detail="You  are not allowed to update")
 
     body = body.model_dump()
     for field , value in body.items():
@@ -47,11 +50,14 @@ def update_task(task_id: int , body:TaskSchema, db:Session):
 
     return one_task
 
-def delete_task(task_id: int , db:Session):
-    one_task = db.query().get(task_id)
+def delete_task(task_id: int , db:Session , user:UserModel):
+    one_task:TaskModel = db.query().get(task_id)
         
     if not one_task:
         return HTTPException(404 , detail="Not Found")
+
+    if one_task.user_id != user.id:
+            return HTTPException(401 , detail="You  are not allowed to delete")
 
     db.delete(one_task)
     db.commit()

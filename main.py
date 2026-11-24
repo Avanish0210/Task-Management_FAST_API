@@ -10,3 +10,5 @@ app.include_router(task_routes)
 app.include_router(user_routes)
 #pydentic settings library helps to load data from env file to our fast api application
 
+
+
